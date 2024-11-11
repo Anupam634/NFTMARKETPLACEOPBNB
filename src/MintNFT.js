@@ -69,7 +69,7 @@ function MintNFT({ account, web3 }) {
       setMessage('NFT minted successfully!');
       console.log('Transaction receipt:', receipt);
 
-      // Clear form fields after successful minting
+      // Clear form 
       setNftName('');
       setDescription('');
       setPrice('');
