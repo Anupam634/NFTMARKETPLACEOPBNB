@@ -1,38 +1,219 @@
-.App {
+/* General Page Styling */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #2e3b4e 0%, #1c1c1c 100%);
+  color: #fff;
+}
+
+/* Fixed Navigation Bar */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #111;
+  padding: 10px 0;
+  z-index: 100;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: space-between; /* Keeps IGNITUS left and other buttons centered */
+  align-items: center;
+}
+
+/* Brand Name (IGNITUS) on the left */
+.navbar-left {
+  margin-left: 100px;
+  font-size: 35PX;
+}
+
+/* Navigation Buttons Styling */
+nav button {
+  background-color: #00c6ff;
+  color: white;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+nav button:hover {
+  background-color: #00a0cc;
+  transform: scale(1.05);
+}
+
+/* Disconnect Popup Styling */
+.disconnect-popup {
+  position: absolute;
+  top: 30px; /* Position above the account info */
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px); /* Center the button horizontally */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.disconnect-btn {
+  background-color: #ff4040;
+  color: white;
+  padding: 10px 25px;
+  border: none;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s ease;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.disconnect-btn:hover {
+  background-color: #cc3333;
+  transform: scale(1.05);
+}
+
+.account-info {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Show disconnect button on hover */
+.account-info:hover .disconnect-popup {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0); /* Slide the popup down */
+}
+
+/* Main Content Wrapper */
+.app-container {
+  margin-top: 80px; /* Account for fixed navbar height */
+  width: 100%;
+  max-width: 1200px;
+  padding: 20px;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* Heading and Main Content Styling */
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+button {
+  background-color: #00c6ff;
   color: white;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+  margin: 10px;
 }
 
-.App-link {
-  color: #61dafb;
+button:hover {
+  background-color: #00a0cc;
+  transform: scale(1.05);
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+/* Connected Account Section */
+p {
+  color: #b0b0b0;
+  font-size: 1.1rem;
+  margin-top: 20px;
+}
+
+/* For the Connect Wallet Button to be full width */
+.connect-btn {
+  background-color: #00c6ff;
+  color: white;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+  width: 100%; /* Make the button full width */
+  max-width: 300px; /* Limit max-width to avoid it being too wide */
+  display: block;
+  margin: 20px auto; /* Center the button horizontally */
+}
+
+.connect-btn:hover {
+  background-color: #00a0cc;
+  transform: scale(1.05);
+}
+
+/* NFT Display Cards */
+.nft-card {
+  background-color: #1f1f1f;
+  padding: 20px;
+  border-radius: 10px;
+  margin: 15px;
+  text-align: center;
+  width: 280px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease-in-out;
+}
+
+.nft-card:hover {
+  transform: scale(1.05);
+}
+
+.nft-card img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.nft-card h3 {
+  font-size: 1.5rem;
+  margin: 10px 0;
+  color: #fff;
+}
+
+.nft-card p {
+  color: #aaa;
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.nft-card .price {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #00c6ff;
+}
+
+/* For Mobile Responsiveness */
+@media (max-width: 768px) {
+  nav {
+    flex-direction: column;
+    align-items: center;
   }
-  to {
-    transform: rotate(360deg);
+
+  nav button {
+    font-size: 14px;
+    padding: 10px 25px;
+    margin: 10px 0;
+  }
+
+  .app-container {
+    padding: 15px;
+  }
+
+  .nft-card {
+    width: 100%;
+    margin: 10px auto;
+  }
+
+  .nft-card img {
+    height: 200px;
+    object-fit: cover;
   }
 }
