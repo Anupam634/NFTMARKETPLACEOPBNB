@@ -8,10 +8,13 @@ function MyNFTs({ account, web3 }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  const contractAddress = "0xec6334c3ab02e41daa0d4993fa2e66526be0a227"; 
+  // Contract address deployed on opBNB Testnet
+  const contractAddress = "0x16c69df921b83bf0abe15349869bed46ecfb66ee";
 
+  // Create contract instance
   const contract = new web3.eth.Contract(nftContractABI, contractAddress);
 
+  // Load user's NFTs
   const loadNFTs = async () => {
     if (!account) {
       setMessage('Please connect your wallet.');
@@ -34,36 +37,50 @@ function MyNFTs({ account, web3 }) {
             tokenId,
             name: metadata.name,
             description: metadata.description,
-            price: Web3.utils.fromWei(metadata.price, 'ether'),
+            price: Web3.utils.fromWei(metadata.price, 'ether'), // Convert price to human-readable format
             imageUrl: tokenURI,
-            isForSale: metadata.isForSale
+            isForSale: metadata.isForSale,
           });
         }
       }
 
       setNfts(ownedNFTs);
-      setMessage(ownedNFTs.length ? '' : 'No NFTs minted yet.');
+      setMessage(ownedNFTs.length ? '' : 'No NFTs found in your wallet.');
     } catch (error) {
-      console.error("Error loading NFTs:", error);
-      setMessage('Failed to load NFTs.');
+      console.error('Error loading NFTs:', error);
+      setMessage('Failed to load NFTs. Please try again.');
     }
 
     setLoading(false);
   };
 
+  // Set NFT for sale
   const setNFTForSale = async (tokenId, price) => {
     try {
-      await contract.methods.setForSale(tokenId, Web3.utils.toWei(price, 'ether')).send({ from: account });
-      alert("NFT set for sale successfully!");
-      loadNFTs();
+      // Check if the price entered is valid
+      if (!price || isNaN(price) || Number(price) <= 0) {
+        alert('Please enter a valid price in tBNB.');
+        return;
+      }
+
+      // Interact with the contract to set the NFT for sale
+      await contract.methods
+        .setForSale(tokenId, Web3.utils.toWei(price, 'ether'))
+        .send({ from: account });
+
+      alert('NFT listed for sale successfully!');
+      loadNFTs(); // Refresh the NFT list
     } catch (error) {
-      console.error("Error setting NFT for sale:", error);
+      console.error('Error setting NFT for sale:', error);
+      alert('Failed to set NFT for sale. Please try again.');
     }
   };
 
   useEffect(() => {
-    loadNFTs();
-  }, [account]);
+    if (web3 && account) {
+      loadNFTs();
+    }
+  }, [account, web3]);
 
   return (
     <div>
@@ -78,11 +95,22 @@ function MyNFTs({ account, web3 }) {
               <img src={nft.imageUrl} alt={nft.name} />
               <h3>{nft.name}</h3>
               <p>{nft.description}</p>
-              <p>Price: {nft.price} ETH</p>
+              <p>Price: {nft.price} tBNB</p>
               {nft.isForSale ? (
-                <button onClick={() => alert("NFT already listed for sale!")}>Listed for Sale</button>
+                <button onClick={() => alert('NFT is already listed for sale!')}>
+                  Listed for Sale
+                </button>
               ) : (
-                <button onClick={() => setNFTForSale(nft.tokenId, prompt("Enter sale price in ETH"))}>Set for Sale</button>
+                <button
+                  onClick={() =>
+                    setNFTForSale(
+                      nft.tokenId,
+                      prompt('Enter sale price in tBNB')
+                    )
+                  }
+                >
+                  Set for Sale
+                </button>
               )}
             </div>
           ))}

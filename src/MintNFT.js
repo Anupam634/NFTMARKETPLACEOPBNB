@@ -18,7 +18,7 @@ function MintNFT({ account, web3 }) {
   const [imageURL, setImageURL] = useState('');
 
   // Only create the contract if web3 is defined
-  const contractAddress = "0xec6334c3ab02e41daa0d4993fa2e66526be0a227";
+  const contractAddress = '0x16c69df921b83bf0abe15349869bed46ecfb66ee'; // Replace with your opBNB contract address
   const contract = web3 ? new web3.eth.Contract(nftContractABI, contractAddress) : null;
 
   const uploadToPinata = async (file) => {
@@ -53,6 +53,16 @@ function MintNFT({ account, web3 }) {
       return;
     }
 
+    if (window.ethereum.networkVersion !== '5611') { // Check for opBNB Testnet
+      alert('Please connect to the opBNB Testnet to mint your NFT.');
+      return;
+    }
+
+    if (price <= 0) {
+      alert('Please set a valid price greater than 0.');
+      return;
+    }
+
     setMinting(true);
     setMessage('Uploading image to Pinata IPFS...');
 
@@ -61,6 +71,8 @@ function MintNFT({ account, web3 }) {
       const imageUrl = `https://gateway.pinata.cloud/ipfs/${imageIpfsHash}`;
       setImageURL(imageUrl);
       setMessage('Minting NFT...');
+
+      console.log('NFT Details:', { nftName, description, price, account, image });
 
       const receipt = await contract.methods
         .mint(account, nftName, description, Web3.utils.toWei(price, 'ether'), imageUrl)
@@ -92,6 +104,7 @@ function MintNFT({ account, web3 }) {
           value={nftName}
           onChange={(e) => setNftName(e.target.value)}
           className="input-field"
+          disabled={minting}
         />
       </div>
       <div className="input-container">
@@ -100,23 +113,26 @@ function MintNFT({ account, web3 }) {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           className="input-field"
+          disabled={minting}
         />
       </div>
       <div className="input-container">
         <input
           type="number"
-          placeholder="Price (in ETH)"
+          placeholder="Price (in tBNB)"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
           className="input-field"
+          disabled={minting}
         />
       </div>
       <div className="input-container">
         <input
           type="file"
-          accept="image/*"  // Restrict file input to images only
+          accept="image/*"
           onChange={(e) => setImage(e.target.files[0])}
           className="file-input"
+          disabled={minting}
         />
       </div>
       <button onClick={mintNFT} disabled={minting} className="mint-button">

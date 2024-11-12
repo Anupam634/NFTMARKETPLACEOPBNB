@@ -5,16 +5,22 @@ import nftContractABI from './nftContractABI.json';
 function Marketplace({ web3, account }) {
   const [nftsForSale, setNftsForSale] = useState([]);
   const [loading, setLoading] = useState(true);
-  const contractAddress = "0xec6334c3ab02e41daa0d4993fa2e66526be0a227"; 
+  const [message, setMessage] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false); // Indicates if a transaction is in progress
+  const [activeTokenId, setActiveTokenId] = useState(null); // Tracks the active NFT being purchased
+  const contractAddress = "0x16c69df921b83bf0abe15349869bed46ecfb66ee"; // Update with your opBNB contract address
 
   // Load NFTs listed for sale
   const loadNFTsForSale = async () => {
     if (!web3 || !account) {
+      setMessage('Please connect your wallet.');
       setLoading(false);
       return;
     }
 
     try {
+      setLoading(true);
+      setMessage('Loading NFTs for sale...');
       const contract = new web3.eth.Contract(nftContractABI, contractAddress);
       const tokenCount = await contract.methods.tokenCounter().call();
       const forSale = [];
@@ -27,51 +33,63 @@ function Marketplace({ web3, account }) {
             tokenId,
             name: metadata.name,
             description: metadata.description,
-            price: Web3.utils.fromWei(metadata.price, 'ether'),
+            price: Web3.utils.fromWei(metadata.price, 'ether'), // Pricing in tBNB
             imageUrl: tokenURI,
-            owner: metadata.owner
+            owner: metadata.owner,
           });
         }
       }
+
       setNftsForSale(forSale);
-      setLoading(false);
+      setMessage(forSale.length === 0 ? 'No NFTs available for sale.' : '');
     } catch (error) {
-      console.error("Error loading NFTs for sale:", error);
-      setLoading(false);
+      console.error('Error loading NFTs for sale:', error);
+      setMessage('Failed to load NFTs. Please try again.');
     }
+    setLoading(false);
   };
 
   // Buy NFT function
   const buyNFT = async (tokenId, price, owner) => {
     if (!web3 || !account) {
-      alert("Please connect your wallet.");
+      alert('Please connect your wallet.');
       return;
     }
 
     if (owner.toLowerCase() === account.toLowerCase()) {
-      alert("You cannot buy your own NFT.");
+      alert('You cannot buy your own NFT.');
       return;
     }
+
+    if (isProcessing) {
+      alert('A purchase is already in progress. Please wait.');
+      return;
+    }
+
+    setIsProcessing(true);
+    setActiveTokenId(tokenId); // Set the active NFT being purchased
 
     try {
       const contract = new web3.eth.Contract(nftContractABI, contractAddress);
       await contract.methods.buyNFT(tokenId).send({
         from: account,
-        value: Web3.utils.toWei(price, 'ether'),
+        value: Web3.utils.toWei(price, 'ether'), // Payment in tBNB
       });
-      alert("NFT purchased successfully!");
-      loadNFTsForSale();
+      alert('NFT purchased successfully!');
+      loadNFTsForSale(); // Refresh the marketplace
     } catch (error) {
-      console.error("Error purchasing NFT:", error);
+      console.error('Error purchasing NFT:', error);
+      alert('Failed to purchase NFT. Please try again.');
     }
+
+    setIsProcessing(false);
+    setActiveTokenId(null); // Reset the active token ID after purchase
   };
 
   useEffect(() => {
     if (account) {
-      setLoading(true);
       loadNFTsForSale();
     } else {
-      // Clear NFTs when account is disconnected
       setNftsForSale([]);
       setLoading(false);
     }
@@ -83,7 +101,7 @@ function Marketplace({ web3, account }) {
       {!account ? (
         <p>Please connect your wallet to view the marketplace.</p>
       ) : loading ? (
-        <p>Loading, please wait...</p>
+        <p>{message}</p>
       ) : nftsForSale.length > 0 ? (
         <div className="nft-container">
           {nftsForSale.map((nft) => (
@@ -91,13 +109,18 @@ function Marketplace({ web3, account }) {
               <img src={nft.imageUrl} alt={nft.name} />
               <h3>{nft.name}</h3>
               <p>{nft.description}</p>
-              <p>Price: {nft.price} ETH</p>
-              <button onClick={() => buyNFT(nft.tokenId, nft.price, nft.owner)}>Buy</button>
+              <p>Price: {nft.price} tBNB</p>
+              <button
+                onClick={() => buyNFT(nft.tokenId, nft.price, nft.owner)}
+                disabled={isProcessing} // Disable all buttons if a transaction is in progress
+              >
+                {activeTokenId === nft.tokenId ? 'Buying...' : 'Buy'}
+              </button>
             </div>
           ))}
         </div>
       ) : (
-        <p>No NFTs available for sale.</p>
+        <p>{message}</p>
       )}
     </div>
   );
